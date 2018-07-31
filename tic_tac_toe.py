@@ -96,7 +96,7 @@ x_wins = 0
 o_wins = 0
 draws = 0
 
-# Perform breadth-first search through all possible moves, tabulating
+# Perform depth-first search through all possible moves, tabulating
 # a result if the game concludes, otherwise adding nodes representing
 # all possible next moves and adding them to the processing queue
 while len(nodes_to_process):
