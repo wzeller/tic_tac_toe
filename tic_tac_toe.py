@@ -5,6 +5,7 @@ def transpose(board):
 			new_board[y][x] = board[x][y]
 	return new_board
 
+
 def eval_board(board):
 	"""
 	Takes a board (format [['x','x', None], ['o', 'o', 'x'], [None, None, None]]) 
@@ -21,37 +22,26 @@ def eval_board(board):
 	if len(total_str) < 5:
 		return None
 
+	x_win = ['x', 'x', 'x']
+	o_win = ['o', 'o', 'o']
+
 	# Test rows
 	for row in board:
-		if row == ['x', 'x', 'x']:
-			return 'x'
-		elif row == ['o', 'o', 'o']:
-			return 'o'
-
+		if row == x_win: return 'x' 
+		if row == o_win: return 'o' 
+			
 	# Test columns
 	for row in transpose(board):
-		if row == ['x', 'x', 'x']:
-			return 'x'
-		elif row == ['o', 'o', 'o']:
-			return 'o'
+		if row == x_win: return 'x' 
+		if row == o_win: return 'o' 
 
 	# Test diagonals
-	if (board[0][0] == 'x' and
-		board[1][1] == 'x' and 
-		board[2][2] == 'x'):
-			return 'x'
-	if (board[0][0] == 'o' and
-		board[1][1] == 'o' and 
-		board[2][2] == 'o'):
-			return 'o'
-	if (board[0][2] == 'x' and
-		board[1][1] == 'x' and 
-		board[2][0] == 'x'):
-			return 'x'
-	if (board[0][2] == 'o' and
-		board[1][1] == 'o' and 
-		board[2][0] == 'o'):
-			return 'o'
+	if ([board[0][0], board[1][1], board[2][2]] == x_win or 
+		[board[0][2], board[1][1], board[2][0]] == x_win):
+		return 'x'
+	if ([board[0][0], board[1][1], board[2][2]] == o_win or 
+		[board[0][2], board[1][1], board[2][0]] == o_win):
+		return 'o'
 
 	# No win and full board is a draw
 	if len(total_str) == 9:
@@ -112,16 +102,19 @@ while len(nodes_to_process):
 		else:
 			raise Error
 	else:
+
+		# Make new nodes for all possible moves based on 
+		# blank squares for current state
 		for blank in node.blank_squares():
 
-			#clone board
+			#clone board from current state
 			board = [x[:] for x in node.board]
 
-			# Make new nodes for all possible moves
+			# Make new state and make move to empty square
 			new_node = Node(board, node.turn)
 			new_node.make_move(blank)
 
-			# Add new states to the queue to process
+			# Add new state to the queue to process
 			nodes_to_process.append(new_node)
 
 print 'x', x_wins
