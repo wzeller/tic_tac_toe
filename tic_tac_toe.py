@@ -222,12 +222,12 @@ while len(nodes_to_process):
 total_weighted_outcomes = weighted_x_wins + weighted_o_wins + weighted_draws
 print 'average num moves in total:', float(total_length)/len(finished_games)
 print 'total x wins:', x_wins, float(x_wins)/len(finished_games)
-print 'weighted prob x wins:', weighted_x_wins, float(weighted_x_wins)/total_weighted_outcomes
+print 'weighted prob x wins:', weighted_x_wins
 print 'total o wins:', o_wins, float(o_wins)/len(finished_games)
-print 'weighted o wins:', weighted_o_wins, float(weighted_o_wins)/total_weighted_outcomes
+print 'weighted o wins:', weighted_o_wins
 print 'total draws:', draws, float(draws)/len(finished_games)
-print 'weighted draws:', weighted_draws, float(weighted_draws)/total_weighted_outcomes
-print 'total weighted outcomes', total_weighted_outcomes
+print 'weighted draws:', weighted_draws
+print 'total weighted outcomes:', total_weighted_outcomes
 
 total_possible_games = x_wins + o_wins + draws
 
