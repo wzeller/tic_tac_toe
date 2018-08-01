@@ -1,3 +1,6 @@
+import random
+from random import randrange
+
 def transpose(board):
 	new_board = [[None, None, None], [None, None, None], [None, None, None]]
 	for x in xrange(0,3):
@@ -107,6 +110,12 @@ class Node(object):
 		else:
 			self.turn = 'x'
 
+	def make_random_move(self):
+		squares = self.blank_squares()
+		idx = randrange(0,len(squares))
+		move = squares[idx]
+		self.make_move(move)
+
 	def stringify_board(self):
 		string = ""
 		for row in self.board:
@@ -117,11 +126,10 @@ class Node(object):
 					string += "_"
 		return string 
 
-
-# Start with a blank board and 'x' going first
-board  = [[None, None, None], [None, None, None], [None, None, None]]
+new_board  = [[None, None, None], [None, None, None], [None, None, None]]
+new_board_clone = [x[:] for x in new_board]
 turn = 'x'
-start_node = Node(board, turn)
+start_node = Node(new_board_clone, turn)
 nodes_to_process = [start_node]
 x_wins = 0
 o_wins = 0
@@ -181,26 +189,48 @@ while len(nodes_to_process):
 			# Add new position to the queue to process
 			nodes_to_process.append(new_node)
 
-print 'total x wins:', x_wins
-print 'total o wins:', o_wins
-print 'total draws:', draws
-print 'total distinct outcomes:', len(distinct_outcomes.keys())
+print 'total x wins:', x_wins, float(x_wins)/len(finished_games)
+print 'total o wins:', o_wins, float(o_wins)/len(finished_games)
+print 'total draws:', draws, float(draws)/len(finished_games)
 
-# If you want to visualize how the games progressed, you can 
-# iterate through the finished ones and print the history
-# and result.
-for game in finished_games[0:10]:
-	game.print_history()
-	game.print_board()
-	result = game.evaluate()
-	if result == 'x':
-		print "X won!"
-	elif result == "o":
-		print "O won!"
-	elif result == "d":
-		print "Cat's game!"
-	print "-----------"
+total_possible_games = x_wins + o_wins + draws
 
+# Start with a blank board and 'x' going first, move randomly till game over
+new_board  = [[None, None, None], [None, None, None], [None, None, None]]
+new_board_clone = [x[:] for x in new_board]
+turn = 'x'
+start_node = Node(new_board_clone, turn)
+nodes_to_process = [start_node]
+x_wins = 0
+o_wins = 0
+draws = 0
+finished_games = []
+
+# Simulate as many games as run above to completion and look at percentage of x wins, 
+#o wins and draws
+while len(finished_games) <= total_possible_games:
+	result = start_node.evaluate()
+	if result:
+		if result == 'x':
+			x_wins += 1
+		elif result == 'o':
+			o_wins += 1
+		elif result == 'd':
+			draws += 1
+		else:
+			raise Error
+		finished_games.append(start_node)
+		new_board_clone = [x[:] for x in new_board]
+		start_node = Node(new_board_clone, turn)
+	else:
+		start_node.make_random_move()
+
+total = len(finished_games)
+
+
+print 'simulated x wins:', x_wins, float(x_wins)/total
+print 'simulated o wins:', o_wins, float(o_wins)/total
+print 'simulated draws:', draws, float(draws)/total
 
 
 
