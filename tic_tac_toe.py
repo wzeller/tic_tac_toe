@@ -126,6 +126,9 @@ class Node(object):
 					string += "_"
 		return string 
 
+	def num_moves(self):
+		return 9 - len(self.blank_squares())
+
 new_board  = [[None, None, None], [None, None, None], [None, None, None]]
 new_board_clone = [x[:] for x in new_board]
 turn = 'x'
@@ -134,6 +137,7 @@ nodes_to_process = [start_node]
 x_wins = 0
 o_wins = 0
 draws = 0
+total_length = 0
 finished_games = []
 distinct_outcomes = {}
 
@@ -156,6 +160,7 @@ while len(nodes_to_process):
 		# Keep the finished game positions to view how they
 		# unfolded
 		finished_games.append(node)
+		total_length += node.num_moves()
 
 		# Get a hashable representation of the final board, add
 		# it to the dict if it doesn't already exist
@@ -189,6 +194,7 @@ while len(nodes_to_process):
 			# Add new position to the queue to process
 			nodes_to_process.append(new_node)
 
+print 'average num moves in total', float(total_length)/len(finished_games)
 print 'total x wins:', x_wins, float(x_wins)/len(finished_games)
 print 'total o wins:', o_wins, float(o_wins)/len(finished_games)
 print 'total draws:', draws, float(draws)/len(finished_games)
@@ -204,11 +210,12 @@ nodes_to_process = [start_node]
 x_wins = 0
 o_wins = 0
 draws = 0
-finished_games = []
+finished_simul_games = []
+total_length = 0
 
 # Simulate as many games as run above to completion and look at percentage of x wins, 
 #o wins and draws
-while len(finished_games) <= total_possible_games:
+while len(finished_simul_games) <= total_possible_games:
 	result = start_node.evaluate()
 	if result:
 		if result == 'x':
@@ -219,15 +226,16 @@ while len(finished_games) <= total_possible_games:
 			draws += 1
 		else:
 			raise Error
-		finished_games.append(start_node)
+		finished_simul_games.append(start_node)
+		total_length += start_node.num_moves()
 		new_board_clone = [x[:] for x in new_board]
 		start_node = Node(new_board_clone, turn)
 	else:
 		start_node.make_random_move()
 
-total = len(finished_games)
+total = len(finished_simul_games)
 
-
+print 'average num moves in simul', float(total_length)/total
 print 'simulated x wins:', x_wins, float(x_wins)/total
 print 'simulated o wins:', o_wins, float(o_wins)/total
 print 'simulated draws:', draws, float(draws)/total
