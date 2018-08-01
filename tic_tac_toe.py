@@ -1,5 +1,6 @@
 import random
 from random import randrange
+import math
 
 def transpose(board):
 	new_board = [[None, None, None], [None, None, None], [None, None, None]]
@@ -27,6 +28,8 @@ def eval_board(board):
 
 	x_win = ['x', 'x', 'x']
 	o_win = ['o', 'o', 'o']
+	diagonal_one = [board[0][0], board[1][1], board[2][2]]
+	diagonal_two = [board[0][2], board[1][1], board[2][0]]
 
 	# Test rows
 	for row in board:
@@ -39,11 +42,9 @@ def eval_board(board):
 		if row == o_win: return 'o' 
 
 	# Test diagonals
-	if ([board[0][0], board[1][1], board[2][2]] == x_win or 
-		[board[0][2], board[1][1], board[2][0]] == x_win):
+	if (diagonal_one == x_win or diagonal_two == x_win):
 		return 'x'
-	if ([board[0][0], board[1][1], board[2][2]] == o_win or 
-		[board[0][2], board[1][1], board[2][0]] == o_win):
+	if (diagonal_one == o_win or diagonal_two == o_win):
 		return 'o'
 
 	# No win and full board is a draw
@@ -135,11 +136,31 @@ turn = 'x'
 start_node = Node(new_board_clone, turn)
 nodes_to_process = [start_node]
 x_wins = 0
+weighted_x_wins = 0
 o_wins = 0
+weighted_o_wins = 0
 draws = 0
+weighted_draws = 0
 total_length = 0
 finished_games = []
 distinct_outcomes = {}
+nine_fac = math.factorial(9)
+four_fac = 24
+three_fac = 6
+two_fac = 2
+
+odds_of_5_move = float(1) / (nine_fac/four_fac)
+odds_of_6_move = float(1) / (nine_fac/three_fac)
+odds_of_7_move = float(1) / (nine_fac/two_fac)
+odds_of_8_move = float(1) / (nine_fac)
+odds_of_9_move = float(1) / (nine_fac)
+weighted_prob_for_moves = {
+	5: odds_of_5_move,
+	6: odds_of_6_move,
+	7: odds_of_7_move,
+	8: odds_of_8_move,
+	9: odds_of_9_move
+}
 
 # Perform depth-first search through all possible moves, tabulating
 # a result if the game concludes, otherwise adding nodes representing
@@ -148,12 +169,16 @@ while len(nodes_to_process):
 	node = nodes_to_process.pop()
 	result = node.evaluate()
 	if result:
+		weighted_prob = weighted_prob_for_moves[node.num_moves()]
 		if result == 'x':
 			x_wins += 1
+			weighted_x_wins += weighted_prob
 		elif result == 'o':
 			o_wins += 1
+			weighted_o_wins += weighted_prob
 		elif result == 'd':
 			draws += 1
+			weighted_draws += weighted_prob
 		else:
 			raise Error
 
@@ -194,10 +219,15 @@ while len(nodes_to_process):
 			# Add new position to the queue to process
 			nodes_to_process.append(new_node)
 
-print 'average num moves in total', float(total_length)/len(finished_games)
+total_weighted_outcomes = weighted_x_wins + weighted_o_wins + weighted_draws
+print 'average num moves in total:', float(total_length)/len(finished_games)
 print 'total x wins:', x_wins, float(x_wins)/len(finished_games)
+print 'weighted prob x wins:', weighted_x_wins, float(weighted_x_wins)/total_weighted_outcomes
 print 'total o wins:', o_wins, float(o_wins)/len(finished_games)
+print 'weighted o wins:', weighted_o_wins, float(weighted_o_wins)/total_weighted_outcomes
 print 'total draws:', draws, float(draws)/len(finished_games)
+print 'weighted draws:', weighted_draws, float(weighted_draws)/total_weighted_outcomes
+print 'total weighted outcomes', total_weighted_outcomes
 
 total_possible_games = x_wins + o_wins + draws
 
