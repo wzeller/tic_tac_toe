@@ -107,6 +107,16 @@ class Node(object):
 		else:
 			self.turn = 'x'
 
+	def stringify_board(self):
+		string = ""
+		for row in self.board:
+			for el in row:
+				if el:
+					string += el
+				else:
+					string += "_"
+		return string 
+
 
 # Start with a blank board and 'x' going first
 board  = [[None, None, None], [None, None, None], [None, None, None]]
@@ -117,6 +127,7 @@ x_wins = 0
 o_wins = 0
 draws = 0
 finished_games = []
+distinct_outcomes = {}
 
 # Perform depth-first search through all possible moves, tabulating
 # a result if the game concludes, otherwise adding nodes representing
@@ -137,6 +148,15 @@ while len(nodes_to_process):
 		# Keep the finished game positions to view how they
 		# unfolded
 		finished_games.append(node)
+
+		# Get a hashable representation of the final board, add
+		# it to the dict if it doesn't already exist
+		board_string = node.stringify_board()
+		outcome_exists = distinct_outcomes.get(board_string, None)
+		if not outcome_exists:
+			distinct_outcomes[board_string] = 1
+		else:
+			distinct_outcomes[board_string] += 1
 	else:
 
 		# Make new nodes for all possible moves based on 
@@ -164,6 +184,7 @@ while len(nodes_to_process):
 print 'total x wins:', x_wins
 print 'total o wins:', o_wins
 print 'total draws:', draws
+print 'total distinct outcomes:', len(distinct_outcomes.keys())
 
 # If you want to visualize how the games progressed, you can 
 # iterate through the finished ones and print the history
