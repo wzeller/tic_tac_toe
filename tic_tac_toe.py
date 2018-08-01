@@ -59,10 +59,40 @@ def get_blanks(board):
 	return blanks
 
 class Node(object):
+	"""
+	A Node captures all the state of any given tic-tac-toe
+	position, including the moves thus far, the current board
+	and whose turn it is.  There are some methods for printing
+	as well as getting the blank squares of the position.
+	"""
 
 	def __init__(self, board, turn):
 		self.board = board
 		self.turn = turn
+		self.history = []
+
+	def copy_history(self, history):
+		self.history = history
+
+	def add_to_history(self, node):
+		self.history.append(node)
+
+	def print_board(self, board=None):
+		if board:
+			print_board = board
+		else:
+			print_board = self.board
+		for row in print_board:
+			first, second, third = row[0], row[1], row[2]
+			if not first: first = "_"
+			if not second: second = "_"
+			if not third: third = "_"
+			print "%s %s %s" % (first, second, third)
+		print "\n"
+
+	def print_history(self):
+		for b in self.history:
+			self.print_board(b)
 
 	def evaluate(self):
 		return eval_board(self.board)
@@ -78,6 +108,7 @@ class Node(object):
 			self.turn = 'x'
 
 
+# Start with a blank board and 'x' going first
 board  = [[None, None, None], [None, None, None], [None, None, None]]
 turn = 'x'
 start_node = Node(board, turn)
@@ -85,6 +116,7 @@ nodes_to_process = [start_node]
 x_wins = 0
 o_wins = 0
 draws = 0
+finished_games = []
 
 # Perform depth-first search through all possible moves, tabulating
 # a result if the game concludes, otherwise adding nodes representing
@@ -101,25 +133,52 @@ while len(nodes_to_process):
 			draws += 1
 		else:
 			raise Error
+
+		# Keep the finished game positions to view how they
+		# unfolded
+		finished_games.append(node)
 	else:
 
 		# Make new nodes for all possible moves based on 
-		# blank squares for current state
+		# blank squares for current position
 		for blank in node.blank_squares():
 
-			#clone board from current state
+			#clone board and history from current state
 			board = [x[:] for x in node.board]
+			board_clone = [x[:] for x in board]
+			history = [x[:] for x in node.history]
 
 			# Make new state and make move to empty square
 			new_node = Node(board, node.turn)
+			
+			# Track history of position to be able to see 
+			# progression of moves after game is over
+			new_node.copy_history(history)
+			new_node.add_to_history(board_clone)
+
 			new_node.make_move(blank)
 
-			# Add new state to the queue to process
+			# Add new position to the queue to process
 			nodes_to_process.append(new_node)
 
-print 'x', x_wins
-print 'o', o_wins
-print 'd', draws
+print 'total x wins:', x_wins
+print 'total o wins:', o_wins
+print 'total draws:', draws
+
+# If you want to visualize how the games progressed, you can 
+# iterate through the finished ones and print the history
+# and result.
+for game in finished_games[0:10]:
+	game.print_history()
+	game.print_board()
+	result = game.evaluate()
+	if result == 'x':
+		print "X won!"
+	elif result == "o":
+		print "O won!"
+	elif result == "d":
+		print "Cat's game!"
+	print "-----------"
 
 
 
